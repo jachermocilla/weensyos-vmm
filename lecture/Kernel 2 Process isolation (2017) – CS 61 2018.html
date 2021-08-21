@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs161.css">
+    <title>Kernel 2: Process isolation (2017) – CS 61 2018</title>
+  </head>
+  <body>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+  <a class="navbar-brand" href="https://cs61.seas.harvard.edu/site/">CS 61 2018</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Info
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Concepts/">Concepts</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/CourseDescription/">Course Description</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Staff/">Course Staff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Extension/">Extension</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ZoomOH/">Extension School Zoom Office Hours</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Prerequisites/">Prerequisites</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Resources/">Resources</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Schedule/">Schedule</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Style/">Style</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Textbook/">Textbook</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Infrastructure/">Infrastructure</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/DatarepEx/">Exercises: Data representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/AsmEx/">Exercises: Assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/StorageEx/">Exercises: Storage</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/KernelEx/">Exercises: Kernel</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ShellEx/">Exercises: Shell</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/MiscEx/">Exercises: Miscellaneous</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Patterns/">C and C++ Patterns</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Diff/">Diff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/FileDescriptors/">File Descriptors</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDBCmds/">GDB Commands</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDB/">GDB Introduction</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Git/">Git</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Problem sets
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Dmalloc/">Problem set 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/BinaryBomb/">Problem set 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Stdio/">Problem set 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/WeensyOS/">Problem set 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell/">Problem set 5</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Lectures
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep2/">Data representation 2: Object representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep3/">Data representation 3: Layout</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep4/">Data representation 4: Pointers and undefined behavior</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep5/">Data representation 5: Undefined behavior, bitwise operations, arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep6/">Data representation 6: Arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm1/">Assembly 1: Basics</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm2/">Assembly 2: Calling convention</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm3/">Assembly 3: Optimizations and assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm4/">Assembly 4: Buffer overflows</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage1/">Storage 1: Caches</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage2/">Storage 2: Cache model</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage3/">Storage 3: Stdio cache</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage4/">Storage 4: Consistency</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel1/">Kernel 1: Robustness and safety</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2/">Kernel 2: Process isolation and virtual memory</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3/">Kernel 3: x86-64 page tables and WeensyOS</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4/">Kernel 4: Protection and isolation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5/">Kernel 5: Confused deputy attack, scheduling, and process management</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell1/">Shell 1: Process control</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2Old/">Kernel 2: Process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3Old/">Kernel 3: x86-64 virtual memory (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4Old/">Kernel 4: Page tables and process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5Old/">Kernel 5: Confused deputy (2017)</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sections
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section1/">Section 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section2/">Section 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section3/">Section 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section4/">Section 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section5/">Section 5</a>
+    
+    </div>
+  </li>
+
+    </ul>
+  </div>
+</nav>
+
+
+<img src="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs61hello.jpg" class="hellobackground">
+
+
+<div class="container">
+    <h1><a href="https://cs61.seas.harvard.edu/site/2018/Kernel2Old/">Kernel 2: Process isolation (2017)</a></h1>
+    <div class="post">
+        <blockquote class="highlight">
+<p>These 2017 notes are being provided as interim notes until the 2018
+notes are ready.</p>
+</blockquote>
+
+<h2 id="kernel-vs-process">Kernel vs. process</h2>
+
+<p>The <strong>kernel</strong> is the piece of operating system software that runs with
+full machine privilege. It starts up when the machine boots and keeps
+running until the machine shuts down.</p>
+
+<p>The software we tend to think of when we think of an operating
+system—the window system, a compiler, a text editor, a web
+browser—does not run with full machine privilege. It runs in
+<strong>unprivileged</strong> mode, in units called <strong>processes</strong> (or <strong>user
+processes</strong>).</p>
+
+<p>A process is <strong>a program in execution.</strong> Processes come and go; they can
+be started, and they can exit or be killed. A single program—that is, an
+executable binary, like <code>ls</code> or <code>emacs</code>—might be running
+simultaneously on the same computer in many different processes.</p>
+
+<p>Another way to think about it is that a process is a <strong>virtual
+computer.</strong> Each process can behave like it has its own processor and
+memory. The operating system, and especially the kernel, manipulates the
+hardware so that different processes don’t interfere inappropriately.</p>
+
+<h2 id="starvation">Starvation</h2>
+
+<p>The kernel aims to provide <strong>fast &amp; fair sharing of machine resources.</strong>
+But true fairness is very difficult to enforce, and it’s not always the
+right goal. Some processes are more important than others, and some
+processes have greater or lesser resource requirements.</p>
+
+<p>The minimal version of fairness is <strong>avoiding starvation</strong>, and almost
+all OSes provide this goal.</p>
+
+<p>Informally, a process <strong>starves</strong>, or experiences starvation, when it
+gets no access to a resource. Formally, a process starves if it
+<em>demands</em> the resource infinitely many times, but <em>acquires</em> the
+resource only <em>finitely</em> many times. (We need the formal definition to
+cover cases like if a process asks for a resource just once—for
+instance, the process tries to send a single network packet, and doesn’t
+succeed because the machine is too busy, but never tries again.)</p>
+
+<p>In our Eve vs. Alice infinite-loop example, when Eve wins, Alice is
+prevented from ever accessing the CPU, so Alice starves. When we
+introduced timer interrupts, Eve still got to run more often—every time
+Alice ran, Alice voluntarily surrendered the CPU to Eve, but Eve never
+voluntarily surrendered the CPU—but Alice did not starve.</p>
+
+<h2 id="process-isolation">Process isolation</h2>
+
+<p>Another, more formal, way to put this goal is that the kernel aims to
+provide <strong>process isolation.</strong> This means that</p>
+
+<div class="hnote">
+
+Processes can interact with one another only as allowed by OS policy.
+
+</div>
+
+<p>The introduction of policy here is what makes OSes different. Almost all
+OSes include starvation avoidance in their policy. Modern OSes also aim
+to isolate processes from bugs in other processes. For example, in
+modern OSes, a memory bug in one process will not affect another
+process, because processes have logically distinct memory spaces—each
+process behaves like it has its own primary memory. But processes are
+not completely isolated; communication is allowed, but it must take
+place over channels allowed by policy, such as files or explicitly
+shared memory.</p>
+
+<p>(Older OSes implemented weaker forms of process isolation; for instance,
+in all versions of Mac OS before Mac OS X, there was no memory
+isolation, so a memory bug in one process could bring down the whole
+machine!)</p>
+
+<p>Stronger forms of process isolation are difficult to implement, because
+both processes and the kernel are just software—executable instructions
+telling the processor what to do. The software instructions executed by
+the kernel have full control over machine resources (otherwise the OS
+would be crippled). But a process with the same power could easily
+violate process isolation! This is why we need need hardware help. The
+hardware must offer a notion of <strong>privilege</strong>, where certain
+instructions—we call them <strong>dangerous instructions</strong>—cannot be executed,
+except by privileged code: the kernel.</p>
+
+<h2 id="x8664-privilege">x86-64 privilege</h2>
+
+<p>x86-64 computers implement privilege using a notion called the <strong>current
+privilege level</strong>, or CPL. This value can be 0 or 3. (It can also be 1
+or 2 but forget those, they are very rarely if ever used.) 0 means
+privileged, 3 means unprivileged. This, upsettingly, means that the
+<em>numerically smaller</em> privilege level means <em>higher</em> privilege. Oh well.</p>
+
+<p>CPL is stored in a special-purpose register called the %cs register.
+Historically this register was frequently used, but now it’s basically
+only used to hold the CPL. Dangerous instructions check the CPL to
+determine how to behave; for instance, I/O instructions, like <code>cli</code>
+(disable interrupts), fault if the current CPL is too unprivileged to
+perform the requested action.</p>
+
+<p>Instructions that change the %cs register are dangerous! Code is
+allowed to reduce its privilege—to go from a higher privilege level to a
+lower level, i.e., from CPL 0 to CPL 3; but any attempt to <em>raise</em> the
+privilege level, i.e., from CPL 3 to CPL 0, will cause a fault.</p>
+
+<h2 id="protected-control-transfer">Protected control transfer</h2>
+
+<p>But unprivileged code still needs to transfer control to privileged
+code—for system calls, for instance. The hardware supports a mechanism
+for safely raising privilege in this way, called <strong>protected control
+transfer.</strong></p>
+
+<p>On x86-64, most protected control transfer uses the processor’s
+<strong>exception</strong> mechanism. An exception is an event that interrupts the
+normal instruction flow, transferring control to the kernel. Exceptions
+come in three varieties: a <strong>trap</strong> is initiated by software, on purpose
+(e.g., the <code>int</code> instruction); an <strong>interrupt</strong> is initiated by
+hardware devices, by surprise (e.g., a timer interrupt); and a <strong>fault</strong>
+is initiated by the CPU, in response to a software error (e.g., a
+segmentation fault or privilege violation).</p>
+
+<p>The x86-64 CPU responds to exceptions using information pre-specified by
+the kernel. Specifically, as it boots up, the kernel initializes a set
+of <strong>interrupt tables</strong> (and other structures) that define, for each
+kind of exception, exactly what the CPU should do. An interrupt table
+entry defines these important aspects of protected control transfer:</p>
+
+<ol>
+<li>The new stack pointer;</li>
+<li>The new instruction pointer;</li>
+<li>And the new privilege level.</li>
+</ol>
+
+<p>To handle an exception, the CPU looks up the relevant interrupt table
+entry; stores several special-purpose registers onto the defined new
+stack (including the old %cs, %rsp, and %rip); and sets the new %rip and
+%cs to the defined values. In your WeensyOS, the interrupt table setup
+occurs in <code>k-hardware.c:segments_init</code> (using macros like
+<code>set_gate</code>), and the exception handlers are located in
+<code>k-exception.S</code>.</p>
+
+<p>Protected control transfer is safe because the kernel pre-specifies
+allowed entry points. If entry points were not pre-specified, and the
+processor let processes jump to privileged code at any address, then
+processes could probably accomplish nefarious goals and violate process
+isolation by choosing just the right unexpected entry point. This would
+be a <strong>privilege escalation attack</strong>, because unprivileged code was able
+to effectively raise its privilege level by abusing an operating system
+feature.</p>
+
+<p>The instructions used to modify are interrupt tables (e.g., <code>lgdt</code>,
+<code>lidt</code>) are, of course, dangerous—a process that can install its own
+privileged exception handlers can easily escalate its privilege.</p>
+
+<h2 id="virtual-memory">Virtual memory</h2>
+
+<p>But it’s not only instructions that require protection. <strong>Memory</strong> also
+requires protection—for instance, it contains instructions. A process
+that can modify kernel code can clearly accomplish any goal that
+requires privilege.</p>
+
+<p>Modern OSes isolate process memory from kernel memory (“kernel
+isolation”), and also isolate different processes’ memory from each
+other. Each process has its own memory space.</p>
+
+<p>The hardware protection mechanism used to provide this goal is <strong>virtual
+memory</strong>. This is one of the coolest hardware mechanisms we’ll see,
+because it’s so powerful and flexible. It supports way more than
+protection; it can be used to make code much faster, and even to support
+cool features like memory-mapped I/O (the <code>mmap</code> system call).</p>
+
+<p>Virtual memory distinguishes the addresses used to refer to physical
+memory chips, which are called <strong>physical addresses</strong>, from the
+addresses used by software and instructions, which are called <strong>virtual
+addresses</strong>. A functional procedure, implemented by the processor, maps
+virtual addresses to physical addresses. Different processes can use
+different procedures, giving them entirely different views of memory.</p>
+
+<p>Different processors implement this procedure in different ways, but we
+will focus on the mechanism used by x86-64, which is a <strong>multi-level
+page table.</strong></p>
+
+<h2 id="ternary-vm">Ternary VM</h2>
+
+<p>Imagine an architecture with a total of 3<sup>3</sup> = 27 different
+addresses. We’ll write addresses for this architecture in ternary
+form—for example, the address 012 represents 0×3<sup>2</sup>+1×3+2 =</p>
+
+<ol start="5">
+<li>Each of those “digits” could be called a <strong>trit</strong> (a ternary bit).</li>
+</ol>
+
+<p>A multi-level page table divides addresses into parts. The least
+significant part is called the <strong>offset</strong>; the more significant parts
+are called <strong>indexes</strong>. In our architecture, the most-significant trit
+is the level 1 index; the middle trit is the level 2 index; and the
+least-significant trit is the offset.</p>
+
+<pre><code>Address   a b c
+          | | |
+          | | \---&gt; offset
+          | \-----&gt; level 2 index
+          \-------&gt; level 1 index
+</code></pre>
+
+<p>Or, in code:</p>
+
+<pre><code>PAGEOFFSET(addr) = addr % 3
+L1PAGEINDEX(addr) = (addr / 3) % 3
+L2PAGEINDEX(addr) = addr / 9
+</code></pre>
+
+<p>The processor translates virtual to physical addresses using the indexes
+and offset. The lookup procedure starts from a special-purpose register
+called <code>%cr3</code> (the same name as in x86-64). This register holds the
+<strong>physical</strong> address of the <em>level 1 page table page</em> (also called the
+“level 1 page table”). (All general-purpose registers hold virtual
+addresses, as do %rip, %rsp, etc.; really only %cr3 and one or two other
+special-purpose registers hold physical addresses.) Each page table page
+holds an array of addresses. The level 1 index is used to index into
+this array, obtaining the physical address of the <em>level 2 page table
+page</em>. The level 2 index is used to index into <em>that</em> array, obtaining
+the physical address of the <em>destination physical page</em>, an array of
+bytes. Finally, the offset is used to index into that page, obtaining
+the physical address.</p>
+
+<p>The following pseudo-code makes this
+concrete.</p>
+
+<pre><code>address_t ternary_virtual_to_physical(uintptr_t va, address_t cr3, int access_type) {
+    cur_pt = cr3;
+    for (int level = 0; level &lt; 2; ++level) {
+        index = (va / (3 ** (2 - level))) % 3;   // compute index
+        entry = cur_pt[index];   // NB uses physical addressing
+        if (access_type is not allowed by entry)
+            FAULT;
+        cur_pt = entry aligned to a page boundary;
+    }
+    return cur_pt + (va % 3);    // apply offset
+}
+</code></pre>
+
+<p>Consider the following contents of ternary memory. We divide ternary
+memory up into “pages” consisting of three addresses each; all addresses
+in the same page share the same indexes, but can have different offsets.
+We write a page by listing the three offsets in order. The page
+addresses are physical, not virtual.</p>
+
+<pre><code>page 00*   page 01*   page 02*
+  000        100        200
+  010        110        210
+  020        120        220
+</code></pre>
+
+<pre><code>page 10*   page 11*   page 12*
+  000        001        002
+  000        001        002
+  000        001        002
+</code></pre>
+
+<pre><code>page 20*   page 21*   page 22*
+  100        120        200
+  110        120        210
+  120        120        220
+</code></pre>
+
+<p>What happens if %cr3 holds physical address 000?</p>
+
+<p>This is what we call an <strong>identity mapping</strong>: every virtual address is
+numerically identical to the corresponding physical address; the memory
+with virtual address <em>N</em> is located at physical address <em>N</em>. To see how,
+consider the virtual address 122. Here’s how the lookup works:</p>
+
+<ul>
+<li>The level 1 index, 1, is applied to the level 1 page table page,
+which is at physical address 000. This gives physical address 010
+for the level 2 page table page.</li>
+<li>The level 2 index, 2, is applied to the level 2 page table page.
+This gives physical address 120 for the destination physical page.</li>
+<li>The offset, 2, is applied to that page’s address, giving 122!</li>
+</ul>
+
+<p>A similar thing happens with address 002.</p>
+
+<ul>
+<li>The level 1 index, 0, is applied to the level 1 page table page,
+which is at physical address 000. This gives physical address 000
+for the level 2 page table page. Note that this is <strong>the same
+address</strong> as the level 1 page table page, but now we are treating
+that physical memory as a level 2 page table page!</li>
+<li>The level 2 index, 0, is applied to the level 2 page table page,
+giving physical address 000 for the destination physical page.</li>
+<li>The offset, 2, is applied to that page’s address, giving 002!</li>
+</ul>
+
+<p>But the identity mapping only holds when %cr3 is 000. If %cr3 is 100,
+for example, the mapping is not an identity. When %cr3 is 100, then only
+physical pages 000, 010, and 020 are accessible.</p>
+
+<p>But real multi-level page tables have additional features that support
+distinguishing privileged and unprivileged accesses, and that allow us
+to cut off some lookups into off-limits memory. Consider this set of
+memory:</p>
+
+<pre><code>page 00*   page 01*   page 02*
+  010        000         -
+  110U       010        blub
+   F         020         -
+</code></pre>
+
+<pre><code>page 10*   page 11*   page 12*
+  010        200U       200U
+  120U       210U       220U
+   F          F          F
+</code></pre>
+
+<pre><code>page 20*   page 21*   page 22*
+   -          -          -
+ chirp       meow        -
+   -          -         bark
+</code></pre>
+
+<p>We write “U” after an address to indicate that the corresponding entry
+is accessible to unprivileged processes; if an entry has no “U”, then
+unprivileged accesses to that entry will cause a fault. An entry that
+says “F” always causes a fault, whether or not the accessing code has
+privilege.</p>
+
+<p>Here are some facts about this memory, which you should verify by
+drawing arrows and working through the examples.</p>
+
+<ul>
+<li>If %cr3 = 000, then unprivileged code can only access physical pages
+200 and 210. Specifically, virtual addresses 100-102 correspond to
+physical addresses 200-202, and virtual addresses 110-112 correspond
+to physical addresses 210-212.</li>
+<li>If %cr3 = 000, then privileged code can additionally access physical
+pages 000, 010, and 020, using identity mappings for addresses
+000-022.</li>
+<li>If %cr3 = 000, then unprivileged code can access the bird and the
+cat (using what virtual addresses?). Privileged code can
+additionally access the fish.</li>
+<li>If %cr3 = 000, then no code can access virtual address 120-222;
+these addresses fault.</li>
+</ul>
+
+<!-- end list -->
+
+<ul>
+<li>If %cr3 = 100, then unprivileged code can only access physical pages
+200 and <strong>220</strong>. Specifically, virtual addresses 100-102 correspond
+to physical addresses 200-202, and virtual addresses 110-112
+correspond to physical addresses 220-222.</li>
+<li>If %cr3 = 100, then privileged code can additionally access physical
+addresses 000-022 using identity mappings. Note that %cr3 000 and
+100 share the same level-2 page table page for kernel mappings.</li>
+<li>If %cr3 = 100, then unprivileged code can access the bird and the
+dog (using what virtual addresses?). Privileged code can
+additionally access the fish.</li>
+</ul>
+
+<p>So we see some shared memory (e.g., unprivileged code using either page
+table can access the bird at the same address), and some independent
+memory (e.g., virtual address 110 maps to different physical memory on
+the two page tables).</p>
+
+    </div>
+</div>
+
+        <script src="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/jquery-3.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/popper.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="Kernel%202%20Process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.js" integrity="sha384-O4hpKqcplNCe+jLuBVEXC10Rn1QEqAmX98lKAIFBEDxZI0a+6Z2w2n8AEtQbR4CD" crossorigin="anonymous"></script>
+        <script>(function () {
+        $(".math").each(function () {
+            var t = this.innerText,
+                opt = {throwOnError: false, displayMode: t.substr(0, 2) === "\\["};
+            katex.render(t.replace(/(?:^\\\(|^\\\[|\\\)$|\\\]$)/g, ""), this, opt);
+        });
+        function sol_toggle(sol, hide, storage) {
+            sol.childNodes[0].classList.toggle("hidden", !hide);
+            sol.childNodes[0].classList.toggle("shown", hide);
+            sol.childNodes[1].classList.toggle("hidden", hide);
+            sol.childNodes[1].classList.toggle("shown", !hide);
+            if (storage) {
+                var key = location.href + " " + $(".has-solution").index(sol);
+                if (hide)
+                    sessionStorage.removeItem(key);
+                else
+                    sessionStorage.setItem(key, true);
+            }
+        }
+        $(".solution").each(function () {
+            $(this).wrap('<div class="has-solution"></div>');
+            var sol = this.parentElement;
+            $(sol).prepend('<blockquote class="solution-collapsed js-solution show"><a href="" class="js-solution show"></a></blockquote>');
+            $(this).append('<p><a href="" class="js-solution hide"></a></p>');
+            $(sol).find("a.js-solution.show").text(this.getAttribute("data-show-text") || "Show solution");
+            $(sol).find("a.js-solution.hide").text(this.getAttribute("data-hide-text") || "Hide solution");
+            var key = location.href + " " + $(".has-solution").index(sol);
+            if (sessionStorage.getItem(key))
+                sol_toggle(sol, false, false);
+        });
+        $(document).on("click", ".js-solution", function (event) {
+            if (this.classList.contains("all")) {
+                var hide = this.classList.contains("hide");
+                $(".has-solution").each(function () {
+                    sol_toggle(this, hide, false);
+                });
+                var bq = this.tagName === "BLOCKQUOTE" ? this : this.parentElement;
+                $(bq).find(".show").toggleClass("hidden", !hide);
+                $(bq).find(".hide").toggleClass("hidden", hide);
+            } else {
+                var sol = $(this).closest(".has-solution")[0];
+                sol_toggle(sol, this.classList.contains("hide"), true);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        })()</script>
+    
+
+
+</body></html>

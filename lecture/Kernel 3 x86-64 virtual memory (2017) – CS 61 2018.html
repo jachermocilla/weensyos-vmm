@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs161.css">
+    <title>Kernel 3: x86-64 virtual memory (2017) – CS 61 2018</title>
+  </head>
+  <body>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+  <a class="navbar-brand" href="https://cs61.seas.harvard.edu/site/">CS 61 2018</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Info
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Concepts/">Concepts</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/CourseDescription/">Course Description</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Staff/">Course Staff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Extension/">Extension</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ZoomOH/">Extension School Zoom Office Hours</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Prerequisites/">Prerequisites</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Resources/">Resources</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Schedule/">Schedule</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Style/">Style</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Textbook/">Textbook</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Infrastructure/">Infrastructure</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/DatarepEx/">Exercises: Data representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/AsmEx/">Exercises: Assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/StorageEx/">Exercises: Storage</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/KernelEx/">Exercises: Kernel</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ShellEx/">Exercises: Shell</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/MiscEx/">Exercises: Miscellaneous</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Patterns/">C and C++ Patterns</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Diff/">Diff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/FileDescriptors/">File Descriptors</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDBCmds/">GDB Commands</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDB/">GDB Introduction</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Git/">Git</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Problem sets
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Dmalloc/">Problem set 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/BinaryBomb/">Problem set 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Stdio/">Problem set 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/WeensyOS/">Problem set 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell/">Problem set 5</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Lectures
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep2/">Data representation 2: Object representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep3/">Data representation 3: Layout</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep4/">Data representation 4: Pointers and undefined behavior</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep5/">Data representation 5: Undefined behavior, bitwise operations, arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep6/">Data representation 6: Arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm1/">Assembly 1: Basics</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm2/">Assembly 2: Calling convention</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm3/">Assembly 3: Optimizations and assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm4/">Assembly 4: Buffer overflows</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage1/">Storage 1: Caches</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage2/">Storage 2: Cache model</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage3/">Storage 3: Stdio cache</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage4/">Storage 4: Consistency</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel1/">Kernel 1: Robustness and safety</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2/">Kernel 2: Process isolation and virtual memory</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3/">Kernel 3: x86-64 page tables and WeensyOS</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4/">Kernel 4: Protection and isolation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5/">Kernel 5: Confused deputy attack, scheduling, and process management</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell1/">Shell 1: Process control</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2Old/">Kernel 2: Process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3Old/">Kernel 3: x86-64 virtual memory (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4Old/">Kernel 4: Page tables and process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5Old/">Kernel 5: Confused deputy (2017)</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sections
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section1/">Section 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section2/">Section 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section3/">Section 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section4/">Section 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section5/">Section 5</a>
+    
+    </div>
+  </li>
+
+    </ul>
+  </div>
+</nav>
+
+
+<img src="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs61hello.jpg" class="hellobackground">
+
+
+<div class="container">
+    <h1><a href="https://cs61.seas.harvard.edu/site/2018/Kernel3Old/">Kernel 3: x86-64 virtual memory (2017)</a></h1>
+    <div class="post">
+        <blockquote class="highlight">
+<p>These 2017 notes are being provided as interim notes until the 2018
+notes are ready.</p>
+</blockquote>
+
+<p>Remember that the goal of virtual memory is to give each process an
+independent and isolated view of memory.</p>
+
+<p>In abstract terms, virtual memory introduces a layer of indirection
+between the addresses that programs use, and the addresses wired in to
+the machine’s physical memory chips. You can model this layer of
+indirection as a function:</p>
+
+<pre><code>vmlookup(virtual_address, access_type) -&gt; physical_address OR fault;
+</code></pre>
+
+<p>The processor executes this function every time it accesses memory. This
+is not done in software, it’s done in hardware. So given an instruction
+like <code>movl (%rsp), %rax</code>, the processor first executes the equivalent
+of <code>vmlookup(%rsp, ACCESS_IS_READ)</code> to find the actual physical
+address of the memory to load. All pointer variables in valid C programs
+on x86-64 contain virtual addresses, and all addresses stored in machine
+registers are virtual addresses (with one exception; see below).</p>
+
+<p>The mechanism used by many modern processors, including x86, x86-64, and
+ARM, to implement virtual memory is <strong>hardware page tables.</strong> A hardware
+page table is a structure somewhat like on a <a href="https://en.wikipedia.org/wiki/Radix_tree">radix
+tree</a>, stored in physical
+memory, and used <strong>by the processor’s memory management unit</strong> to
+translate virtual addresses to physical addresses. Software sets up a
+page table in memory and loads the page table’s physical address into a
+special-purpose machine register, <code>%cr3</code>. Then, after that, the
+hardware walks the page table to translate all future virtual address
+lookups to physical addresses.</p>
+
+<p>(Note that processors have some modes where virtual memory is turned
+off. x86-64 chips, for example, start off with no memory protection;
+it’s the job of the boot loader, and/or initial parts of the kernel,
+to turn on virtual memory by supplying an initial page table.)</p>
+
+<h2 id="paged-virtual-memory-in-x8664">Paged virtual memory in x86-64</h2>
+
+<p>(This material is discussed in depth in CS:APP3e Chapter 9, especially
+§9.6-9.7.)</p>
+
+<p>x86-64 uses a multi-level page table structure to translate virtual to
+physical addresses. Specifically, it uses a four-level page table. Every
+<code>vmlookup</code> operation requires walking over up to 4 different aligned
+pages of memory to find the final address.</p>
+
+<p>An x86-64 virtual address contains 48 non-redundant bits of address
+data. (Bits 48 through 63—the top 16 bits—must hold copies of bit 47.
+That is, the valid x86-64 addresses, considered as signed numbers, range
+from -140737488355328 through 140737488355327, inclusive; or in hex,
+0xFFFF800000000000 to 0x00007FFFFFFFFFFF, inclusive.) The x86-64 VM
+system divides this data into five regions, four <em>indexes</em> and an
+<em>offset</em>, as
+follows.</p>
+
+<pre><code>      47     39 38     30 29     21 20     12 11         0
+...--+---------+---------+---------+---------+------------+
+     |wwwwwwwww|xxxxxxxxx|yyyyyyyyy|zzzzzzzzz|aaaaaaaaaaaa|
+...--+---------+---------+---------+---------+------------+
+        9 bits    9 bits    9 bits    9 bits     12 bits
+          |         |         |         |           |
+          |         |         |         |           \--------&gt; Offset         (PAGEOFFSET(va))
+          |         |         |         |
+          |         |         |         \--------------------&gt; Level 4 index  (L4PAGEINDEX(va))
+          |         |         |
+          |         |         \------------------------------&gt; Level 3 index  (L3PAGEINDEX(va))
+          |         |
+          |         \----------------------------------------&gt; Level 2 index  (L2PAGEINDEX(va))
+          |
+          \--------------------------------------------------&gt; Level 1 index  (L1PAGEINDEX(va))
+</code></pre>
+
+<p>To implement <code>vmlookup</code> translation, the processor uses these indexes
+in turn, from most-significant to least-significant, to look up <em>page
+table entries</em> in a series of <em>page table pages.</em> The page table as a
+whole is the collection of page table pages referenced from the
+top-level, level-1 page table page. Each page table page consists of an
+array of entries (on x86-64, a page table page comprises 512 entries).
+And each entry specifies a physical address saying where to go next.
+Level-1 entries specify the physical addresses of level-2 page table
+pages; level-2 entries specify the physical addresses of level-3 page
+table pages; level-3 entries specify the physical addresses of level-4
+page table pages; and level-4 entries specify the physical addresses of
+destination physical pages, where the actual memory resides.</p>
+
+<p>Here’s how the processor implements a virtual address lookup.</p>
+
+<ol>
+<li>First, the processor finds <code>CURPT</code>, the physical address of the
+current level-1 page table page, by reading the value of <code>%cr3</code>.
+<code>CURPT</code> (and therefore <code>%cr3</code>) is a physical address that’s
+aligned to a multiple of 4096 bytes: its lower-order 12 bits are
+always zero.</li>
+<li>The processor treats the memory at physical address <code>CURPT</code> as an
+array of 512 8-byte units. If the virtual address’s level-1 index is
+<em>I1</em>, it will look up entry <code>CURPT[I1]</code>. Call this entry <code>E</code>.</li>
+<li>The processor checks if entry <code>E</code> allows this access. If it does
+not allow it, the processor faults. Otherwise, <code>E</code> contains a
+physical address of the level-2 page table page, which the processor
+stores in <code>CURPT</code>.</li>
+<li>The processor repeats these steps for levels 2 through 4.
+
+<ol>
+<li>It sets <code>E := CURPT[I2]</code>, where <code>I2</code> is the level-2 index.</li>
+<li>If <code>E</code> disallows the access, it faults; otherwise it sets
+<code>CURPT</code> to the level-3 page table page physical address.</li>
+<li>It sets <code>E := CURPT[I3]</code>, where <code>I3</code> is the level-3 index.</li>
+<li>If <code>E</code> disallows the access, it faults; otherwise it sets
+<code>CURPT</code> to the level-4 page table page physical address.</li>
+<li>It sets <code>E := CURPT[I4]</code>, where <code>I4</code> is the level-4 index.</li>
+<li>If <code>E</code> disallows the access, it faults; otherwise it sets
+<code>CURPT</code> to the <strong>destination physical page</strong> physical address.</li>
+</ol></li>
+<li>Now <code>CURPT</code> is an address of the destination physical page, which
+is treated as an array of <em>bytes</em> (not an array of 8-byte words).
+The processor adds the offset—the least-significant 12 bits of the
+virtual address—to this address to obtain the final physical address
+of the memory in question.</li>
+</ol>
+
+<h2 id="sizes-and-alignments">Sizes and alignments</h2>
+
+<p>So why these particular sizes and alignments? Why are indexes 9 bits and
+offsets 12?</p>
+
+<p>Virtual memory architectures tend to fit together like puzzles. The key
+to the puzzle is the <strong>page size</strong>: the fundamental unit in which memory
+is allocated. On x86-64, like x86-32, the page size is 4096, or
+2<sup>12</sup>, bytes. Everything else follows from this choice.</p>
+
+<ul>
+<li>Since the page size is 2<sup>12</sup> bytes, the offset is 12 bits
+long.</li>
+<li>Each page table page must be large enough to fit one entry per
+possible index; and additionally, it is extremely convenient for
+page table pages to have the same size as normal pages. The page
+size is 4096 bytes, and the pointer size (which is the same as the
+physical address size) is 8 bytes. That means a page can hold 4096/8
+= 512 = 2<sup>9</sup> uncompressed entries. Thus, each index should
+be at most 9 bits long.</li>
+</ul>
+
+<p>Page table entries must also support flags that help the VM system
+determine whether an entry allows an access. Since all memory pages are
+aligned—every physical page address is a multiple of 2<sup>12</sup>—the
+least-significant 12 bits of each page address must be zero. Rather than
+require the user to store zero explicitly, though, the virtual memory
+system implicitly sets the bits to zero when loading them, and allows
+entries to use that space for flags. The upper 16 bits (bits 48–63) are
+also available for flags.</p>
+
+<h2 id="flags">Flags</h2>
+
+<p>The x86-64 uses flag bits in each entry to control whether an access is
+allowed. If an access is disallowed by flags, then the hardware will
+fault.</p>
+
+<p>The important bits are:</p>
+
+<ul>
+<li><code>PTE_P</code> (value 1): This entry is Present. If this bit is absent,
+then <em>every</em> access is disallowed.</li>
+<li><code>PTE_W</code> (value 2): This entry is Writable. If this bit is absent,
+then write accesses are disallowed.</li>
+<li><code>PTE_U</code> (value 4): This entry is Unprivileged. If this bit is
+absent, then accesses by unprivileged code are disallowed (the
+processor must have CPL 0 to access this address).</li>
+<li><code>PTE_NX</code> (value 9223372036854775808 = 2<sup>63</sup>): This entry
+is Non-Executable. If this bit is absent, then instructions located
+at these addresses cannot be executed. (The book calls this XD.)</li>
+</ul>
+
+<p>There are others; look at the book, or the x86-64 architecture manual,
+to learn more.</p>
+
+<p>This also tells us what information is used by the memory system for the
+“<code>access_type</code>” argument to the abstract <code>vmlookup</code> function;
+specifically: (1) Is the access a read, a write, or an instruction
+fetch? and (2) Was the access made in unprivileged mode or privileged
+mode?</p>
+
+<h2 id="bitwise-arithmetic">Bitwise arithmetic</h2>
+
+<p>From the diagram above, you should be able to figure out how to
+implement the macros <code>PAGEOFFSET</code>, <code>L1PAGEINDEX</code>, etc. that extract
+components from a virtual address. Here's how:</p>
+
+<pre><code>L1PAGEINDEX(addr) == ((addr &gt;&gt; 39) &amp; 0x1FF)
+L2PAGEINDEX(addr) == ((addr &gt;&gt; 30) &amp; 0x1FF)
+L3PAGEINDEX(addr) == ((addr &gt;&gt; 21) &amp; 0x1FF)
+L4PAGEINDEX(addr) == ((addr &gt;&gt; 12) &amp; 0x1FF)
+PAGEOFFSET(addr)  == (addr &amp; 0xFFF)
+</code></pre>
+
+<h2 id="page-table-sizes">Page table sizes</h2>
+
+<p>Page tables are generally trees, but the processor does not require
+this. The processor implements the algorithm above, walking down the
+page table level by level, without regard to the “type” of page (it’s
+all just memory). For instance, consider the following level-1 page
+table page, stored at physical address 0:</p>
+
+<pre><code>%cr3      +---------------------+
+0x0 ----&gt; | 0x0 + PTE_P + PTE_W | (index 0)
+          | 0x0 + PTE_P + PTE_W | (index 1)
+          | 0x0 + PTE_P + PTE_W | (index 2)
+          | 0x0 + PTE_P + PTE_W | (index 3)
+          | 0x0 + PTE_P + PTE_W |
+          | 0x0 + PTE_P + PTE_W |
+          |         ...         |
+          | 0x0 + PTE_P + PTE_W |
+          | 0x0 + PTE_P + PTE_W | (index 511)
+          +---------------------+
+</code></pre>
+
+<p>This page table page produces a valid page table, even though every
+entry points back at the page table itself! When there is an access,
+the processor will successively treat the page at physical address 0 as
+a level-1 PTP (i.e., page table page), a level-2 PTP, a level-3 PTP, a
+level-4 PTP, and finally a destination physical page. This page table
+takes a single page of physical memory to represent, and it allows
+access to only a single page of physical memory.</p>
+
+<p>Typically, however, we do not see level-2, level-3, and level-4 PTPs
+that are also used as other levels; each PTP has a natural level and it
+is accessed only as that level. That means that the realistic minimum
+size of an x86-64 page table that allows access to at least one page of
+memory is 4 pages, one each for each level.</p>
+
+<p>It is typical for PTPs to be treated as both PTPs and as destination
+physical pages. The kernel must read and write PTPs in order to set up
+page tables! So, typically, every page table will allow access to
+itself—i.e., given a page table <em>PT</em> containing a page table page <em>X</em>,
+there exists a virtual address <em>V</em> so that <em>PT</em> maps <em>V</em> to the physical
+address of <em>X</em>.</p>
+
+<p>The maximum size for a page table is when no two PTPs are shared and
+every PTP entry exists. Such a page table will have 1 level-1 PTP,
+1×2<sup>9</sup> = 512 level-2 PTPs, 512×2<sup>9</sup> = 262144 level-3
+PTPs, and 262144×2<sup>9</sup> = 134217728 level-4 PTPs, for a total of
+134480385 PTPs, or 550831656960 bytes (0x8040201000 bytes) of memory.
+That’s a lot of memory.</p>
+
+<p>But very few page tables actually need to reach this size. Several
+techniques can be used to build a page table that allows access to a lot
+of memory without eating a lot of memory itself.</p>
+
+<ul>
+<li>When a contiguous range of virtual addresses is inaccessible, the
+relevant level-1 (or level-2, or level-3) entries can be marked as
+not present (e.g., set to 0, without <code>PTE_P</code>). There is no need
+to construct level-2-4 page tables underneath not-present entries.
+For example, there’s a lot of vacant, inaccessible address space
+between global data and the heap, or between the heap and the stack;
+and that space doesn’t require page tables.</li>
+<li>Often several page tables can share level-2-4 PTPs <strong>for the
+kernel.</strong> The kernel must exist in every address space so it can
+handle exceptions. In modern OSes, this is implemented by storing
+the entire kernel in an address range that’s shared by all
+processes. Since the address mappings are the same for all processes
+(which is safe since the mappings are kernel-only: <code>PTE_U</code> is
+off), the relevant page table pages can be shared as well. (In
+32-bit architectures, there was sometimes a need for a kernel that
+could “jump around” from virtual address to virtual address, but in
+64-bit architectures there’s enough address space that this is not
+necessary.)</li>
+<li>The hardware itself offers <strong>superpage</strong> mechanisms that can convert
+a level-3 entry into a 2MB “destination physical superpage”, or a
+level-2 entry into a 1GB “destination physical megapage”, using the
+<code>PTE_PS</code> bit. (The “superpage” terminology is standard; “megapage”
+is not.) Using megapages, 512GB of memory can be accessed using just
+2 PTPs (one level-1 and one level-2).</li>
+</ul>
+
+<p>We can see there’s a big difference between the minimum size for a
+realistic page table (i.e., 4 PTPs) and the maximum size for a page
+table (134480385 PTPs). This is actually an advantage, and it explains
+why real VM systems often use this kind of a structure: typical address
+space layouts for processes can be expressed using relatively little
+memory for PTPs, but there’s enough flexibility to implement any
+structure.</p>
+
+<p>Contrast this with a more limited page table design—say, one where
+offsets are 26 bits and there’s only one 22-bit index. This single-level
+page table has maximum size 2<sup>26</sup> = 67108864 = 0x4000000 bytes,
+far smaller than x86-64. But it also has <em>minimum</em> size 2<sup>26</sup>!</p>
+
+<h2 id="page-table-isolation">Page table isolation</h2>
+
+<p>The big advantage of virtual memory for processes is that it lets us
+implement process isolation, where each process is restricted to
+accessing only memory it owns. We can see, though, that x86-64 hardware
+page tables offer a very limited permission structure: an access is
+either privileged or unprivileged, that’s it. But we can still implement
+very sophisticated virtual memory isolation using page tables, by giving
+different page tables to different processes! These page tables can
+share some substructure—and on real operating systems they will (they’ll
+share kernel-only page tables, for example)—but at least the level-1
+PTPs must always differ.</p>
+
+<h2 id="caching">Caching</h2>
+
+<p>Virtual memory lookup is complicated. To perform a translation, the
+hardware must perform at least 4 memory lookups! This sounds slow and
+it is. The solution is…<strong>a cache</strong>. The machine’s memory management unit
+caches virtual-to-physical mappings in a structure called the
+<strong>translation lookaside buffer</strong>, or <strong>TLB</strong>. The TLB is
+hardware-managed, but unlike the processor cache, <strong>it is not
+coherent</strong>: a value in the TLB can be older than the most up-to-date
+value from slower storage. For instance, this can happen if the memory
+representing the active page table changes. The <code>lcr3</code> instruction can
+be used to flush the TLB and refresh its mappings.</p>
+
+    </div>
+</div>
+
+        <script src="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/jquery-3.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/popper.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="Kernel%203%20x86-64%20virtual%20memory%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.js" integrity="sha384-O4hpKqcplNCe+jLuBVEXC10Rn1QEqAmX98lKAIFBEDxZI0a+6Z2w2n8AEtQbR4CD" crossorigin="anonymous"></script>
+        <script>(function () {
+        $(".math").each(function () {
+            var t = this.innerText,
+                opt = {throwOnError: false, displayMode: t.substr(0, 2) === "\\["};
+            katex.render(t.replace(/(?:^\\\(|^\\\[|\\\)$|\\\]$)/g, ""), this, opt);
+        });
+        function sol_toggle(sol, hide, storage) {
+            sol.childNodes[0].classList.toggle("hidden", !hide);
+            sol.childNodes[0].classList.toggle("shown", hide);
+            sol.childNodes[1].classList.toggle("hidden", hide);
+            sol.childNodes[1].classList.toggle("shown", !hide);
+            if (storage) {
+                var key = location.href + " " + $(".has-solution").index(sol);
+                if (hide)
+                    sessionStorage.removeItem(key);
+                else
+                    sessionStorage.setItem(key, true);
+            }
+        }
+        $(".solution").each(function () {
+            $(this).wrap('<div class="has-solution"></div>');
+            var sol = this.parentElement;
+            $(sol).prepend('<blockquote class="solution-collapsed js-solution show"><a href="" class="js-solution show"></a></blockquote>');
+            $(this).append('<p><a href="" class="js-solution hide"></a></p>');
+            $(sol).find("a.js-solution.show").text(this.getAttribute("data-show-text") || "Show solution");
+            $(sol).find("a.js-solution.hide").text(this.getAttribute("data-hide-text") || "Hide solution");
+            var key = location.href + " " + $(".has-solution").index(sol);
+            if (sessionStorage.getItem(key))
+                sol_toggle(sol, false, false);
+        });
+        $(document).on("click", ".js-solution", function (event) {
+            if (this.classList.contains("all")) {
+                var hide = this.classList.contains("hide");
+                $(".has-solution").each(function () {
+                    sol_toggle(this, hide, false);
+                });
+                var bq = this.tagName === "BLOCKQUOTE" ? this : this.parentElement;
+                $(bq).find(".show").toggleClass("hidden", !hide);
+                $(bq).find(".hide").toggleClass("hidden", hide);
+            } else {
+                var sol = $(this).closest(".has-solution")[0];
+                sol_toggle(sol, this.classList.contains("hide"), true);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        })()</script>
+    
+
+
+</body></html>

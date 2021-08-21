@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous">
+    <link rel="stylesheet" href="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs161.css">
+    <title>Kernel 4: Page tables and process isolation (2017) – CS 61 2018</title>
+  </head>
+  <body>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+  <a class="navbar-brand" href="https://cs61.seas.harvard.edu/site/">CS 61 2018</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Info
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Concepts/">Concepts</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/CourseDescription/">Course Description</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Staff/">Course Staff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Extension/">Extension</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ZoomOH/">Extension School Zoom Office Hours</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Prerequisites/">Prerequisites</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Resources/">Resources</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Schedule/">Schedule</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Style/">Style</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Textbook/">Textbook</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Infrastructure/">Infrastructure</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/DatarepEx/">Exercises: Data representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/AsmEx/">Exercises: Assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/StorageEx/">Exercises: Storage</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/KernelEx/">Exercises: Kernel</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/ShellEx/">Exercises: Shell</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/MiscEx/">Exercises: Miscellaneous</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Patterns/">C and C++ Patterns</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Diff/">Diff</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/FileDescriptors/">File Descriptors</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDBCmds/">GDB Commands</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/GDB/">GDB Introduction</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Git/">Git</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Problem sets
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Dmalloc/">Problem set 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/BinaryBomb/">Problem set 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Stdio/">Problem set 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/WeensyOS/">Problem set 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell/">Problem set 5</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Lectures
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep2/">Data representation 2: Object representation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep3/">Data representation 3: Layout</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep4/">Data representation 4: Pointers and undefined behavior</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep5/">Data representation 5: Undefined behavior, bitwise operations, arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Datarep6/">Data representation 6: Arena allocation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm1/">Assembly 1: Basics</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm2/">Assembly 2: Calling convention</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm3/">Assembly 3: Optimizations and assembly</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Asm4/">Assembly 4: Buffer overflows</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage1/">Storage 1: Caches</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage2/">Storage 2: Cache model</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage3/">Storage 3: Stdio cache</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Storage4/">Storage 4: Consistency</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel1/">Kernel 1: Robustness and safety</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2/">Kernel 2: Process isolation and virtual memory</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3/">Kernel 3: x86-64 page tables and WeensyOS</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4/">Kernel 4: Protection and isolation</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5/">Kernel 5: Confused deputy attack, scheduling, and process management</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Shell1/">Shell 1: Process control</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel2Old/">Kernel 2: Process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel3Old/">Kernel 3: x86-64 virtual memory (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel4Old/">Kernel 4: Page tables and process isolation (2017)</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Kernel5Old/">Kernel 5: Confused deputy (2017)</a>
+    
+    </div>
+  </li>
+
+      
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-dropdown-" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sections
+    </a>
+    <div class="dropdown-menu" aria-labelledby="nav-dropdown-">
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section1/">Section 1</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section2/">Section 2</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section3/">Section 3</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section4/">Section 4</a>
+    
+      <a class="dropdown-item" href="https://cs61.seas.harvard.edu/site/2018/Section5/">Section 5</a>
+    
+    </div>
+  </li>
+
+    </ul>
+  </div>
+</nav>
+
+
+<img src="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/cs61hello.jpg" class="hellobackground">
+
+
+<div class="container">
+    <h1><a href="https://cs61.seas.harvard.edu/site/2018/Kernel4Old/">Kernel 4: Page tables and process isolation (2017)</a></h1>
+    <div class="post">
+        <blockquote class="highlight">
+<p>These 2017 notes are being provided as interim notes until the 2018
+notes are ready.</p>
+</blockquote>
+
+<h2 id="virtual-memory-map">Virtual Memory Map</h2>
+
+<pre><code> virtual_memory_map(x86_64_pagetable *pt, uintptr_t va, uintptr_t pa, size_t sz, int perm, x86_64_pagetable*(*allocator)(void))
+</code></pre>
+
+<p>Your problem set has a <code>virtual_memory_map</code> function whose job it is
+to create mappings from virtual to physical memory. A traditional x86
+pagetable has four levels with the <code>L4</code> pagetable pointing to true
+physical memory.</p>
+
+<p>However, it is not always possible for <code>virtual_memory_map</code> to
+perform the mapping. The last argument is something called the
+<code>allocator</code> function. This function is designed to make working with
+multi level pagetables easier. If you pass in a pagetable that has not
+been mapped to a corresponding <code>L2</code>,<code>L3</code>, and <code>L4</code> pagetable, the
+<code>virtual_memory_map</code> function will fail. The <code>allocator</code> function
+is designed to make working with multi level pagetables easier by making
+it so you do not have to think about <code>malloc</code>ing these extra pages.
+The <code>allocator</code> function will perform the <code>malloc</code>s that are
+necessary to create the multi-level pagetable. In order to tell the
+allocator function who should be the owner of a newly created page, we
+can use global variables.</p>
+
+<h2 id="process-isolation">Process Isolation</h2>
+
+<h3 id="two-processes-sharing-once-pagetable">Two Processes Sharing Once Pagetable</h3>
+
+<p>The following is Eve's code.</p>
+
+<pre><code> #include "process.h"
+ #include "lib.h"
+ void process_main(void) {
+     unsigned i = 0;
+     while (1) {
+         ++i;
+         if (i % 1024 == 0) {
+             app_printf(0, "Hi, I'm Eve! #%x\n", i);
+         }
+         if (i % 4096 == 0) {
+             app_printf(0, "EVE REKT\n");
+             uint8_t* code_ptr = (uint8_t*) 0x40042;
+             memcpy(code_ptr, "\xeb\xfe", 2);
+             (void) sys_getpid();
+         }
+         sys_yield();
+     }
+ }
+</code></pre>
+
+<p>This process is isolated from the kernel so it cannot directly modify
+kernel code. However both Eve and Alice share the same pagetable so all
+of user memory is accessible to both Eve and Alice. This makes Eve able
+to destroy Alice by writing zeros to Alice's code segment. We can look
+at Alice's symbol table and see where <code>process_main</code> is located in
+memory.</p>
+
+<pre><code> 0x100000 T process_main 
+ 0x100040 t sys_yield 
+ 0x100050 T memcpy 
+ 0x100080 T memmove 
+ . 
+ . 
+ .
+</code></pre>
+
+<p>Alice's <code>process_main</code> code segment starts at <code>0x100000</code>. Eve can
+directly write zeros to Alice's code segment by changing her code in the
+following
+way:</p>
+
+<pre><code> #include "process.h"
+ #include "lib.h"
+ void process_main(void) {
+     unsigned i = 0;
+     while (1) {
+         ++i;
+         if (i % 1024 == 0) {
+             app_printf(0, "Hi, I'm Eve! #%x\n", i);
+         }
+         if (i % 4096 == 0) {
+             app_printf(0, "EVE REKT\n");
+             uint8_t* code_ptr = (uint8_t*) 0x100000;   // overwriting Alice's code segment now
+             memcpy(code_ptr, 0, PAGESIZE);             // setting entire page to zero
+             (void) sys_getpid();
+         }
+         sys_yield();
+     }
+ }
+</code></pre>
+
+<p>Running this version of the code will result in an error message that
+reads <code>Process 2 pagefauly at 0x230 (rip 0x100042)!</code>. Alice is trying
+to execute codepages that have been zeroed by Eve. This demonstrates the
+danger of allowing two processes to share the same page table. Process
+isolation can be achieved by giving Alice and Eve separate pagetables.
+In the problem set, we solve this by copying the pagetable of another
+process to create a new one. In this class exercise, we will create an
+entirely new pagetable.</p>
+
+<h2 id="working-with-pagetables">Working with Pagetables</h2>
+
+<h3 id="creating-pagetables">Creating Pagetables</h3>
+
+<p>Processes are launched using a call to <code>program_load</code>. This function
+will load the program into the address mappings specified by the process
+pagetable. Before <code>program_load</code> is called, the appropriate
+pagetables should be setup for the process in question. A pagetable
+needs:</p>
+
+<ul>
+<li><strong>Kernel Memory</strong>
+
+<ul>
+<li>Every process will execute system calls. In <code>x86</code>, the
+pagetable does not change when a process executes a system call
+so it is necessary for every process to have a copy of the
+kernel pagetable.</li>
+</ul></li>
+<li><em>' Own Code and Data</em>'</li>
+<li>''' Own Stack '''</li>
+<li>''' Write Access to Console '''</li>
+</ul>
+
+<p>Based on these specifications, we can create a pagetable using calls to
+<code>virtual_memory_map</code>.</p>
+
+<pre><code> x86_64_pagetable* pt = allocator();                            // create a new pagetable
+ memset(pt, 0, PAGESIZE);                                       // clear memory
+ virtual_memory_map(pt, 0, 0, PROC_START_ADDR,                  // map the kernel code
+                    PTE_P | PTE_W, allocator);                  // after this call succeeds subsequent calls to vmm do not need the allocator
+ virtual_memory_map(pt, (uintptr_t)console, (uintptr_t)console, 
+                    PAGESIZE, PTE_P|PTE_W|PTE_U, allocator);    
+ virtual_memory_map(pt, 
+       PROC_START_ADDR + PROC_SIZE * pid - PAGESIZE, 
+       (uintptr_t) allocator(), PAGESIZE, 
+       PTE_P|PTE_U|PTE_W, allocator); 
+ uintptr_t loadaddr = program_get_load_address(program_number);  // locate beginning of process code and data
+ for (int i = 0; i  &lt; 3; ++i) { 
+   virtual_memory_map(pt, loadaddr + i * PAGESIZE, 
+       (uintptr_t) allocator(), PAGESIZE, PTE_P|PTE_U|PTE_W, allocator); 
+ }
+</code></pre>
+
+<p>Creating a pagetable simply consists of allocating the pagetable and
+calling virtual memory map several times to install new address
+mappings. In this example we assume that the process only has three
+pages of code and data for simplicity. Notice that the <code>allocator</code>
+function is used in two different ways.</p>
+
+<ul>
+<li>As the last argument to <code>virtual_memory_map</code></li>
+<li>As the physical address argument to <code>virtual_memory_map</code></li>
+</ul>
+
+<p>When the <code>allocator</code> function is passed as the physical address
+argument to <code>virtual_memory_map</code>, it is passed with the parentheses
+<code>allocator()</code>. This means that the the <code>allocator</code> function has been
+called and the return value of the function is being passed as the third
+argument to <code>virtual_memory_map</code>. This works because the
+<code>allocator</code> function returns a free physical address. When the
+<code>allocator</code> function is passed as the last argument to
+<code>virtual_memory_map</code>, it is passed with no parentheses. This allows
+the <code>virtual_memory_map</code> to conditionally call this function when it
+runs out of memory.</p>
+
+<h3 id="copying-pagetables">Copying Pagetables</h3>
+
+<p>If instead of creating a new pagetable we wanted to copy an existing
+one, we could do so using a loop with <code>virtual_memory_lookup</code> and
+<code>virtual_memory_map</code>. This will result in the copied pagetables
+having mappings to the same physical pages as the original pagetable. In
+other words, the <code>L4</code> pagetable will be identical. Copying a pagetable
+is useful when <code>fork</code>ing. Recall that when a parent process calls
+<code>fork</code>, the child will inherit the address space of the parent. After
+the child process begins to execute independently, any modifications to
+the child pagetable will only affect the child's pagetable. If the child
+process modifies a variable <code>x</code>, the child will see the new value but
+the parent will still see the old value.</p>
+
+<p>This is a key distinction between threads and processes. Each process
+has its own pagetable. However, multiple threads in a process will share
+the same pagetable. This makes threads vulnerable to race conditions
+because multiple threads are modifying shared resources. As we saw in
+the Alice and Eve example, threads are free to change the memory state
+of another thread. Careful synchronization is needed when working with
+threads.</p>
+
+<h3 id="linking-processes-to-pagetables">Linking Processes to Pagetables</h3>
+
+<p>After a pagetable has been created, the <code>struct proc</code> structure should
+be modified so that every process has <code>x86_64_pagetable
+\*p_pagetable</code> field. This associates each process with its own unique
+pagetable. After creating a new pagetable, you can then assign the
+pagetable to a given process by assigning it to the <code>x86_64_pagetable
+\*p_pagetable</code> field in the process struct.</p>
+
+<h3 id="writing-an-allocator-function">Writing an Allocator Function</h3>
+
+<p>Each call to <code>virtual_memory_map</code> above referred to an <code>allocator</code>
+function. In this section we see how to write an effective <code>allocator</code>
+function.</p>
+
+<p>The kernel has a stack and some code and data. There are several free
+pages between the stack and the code and data that the allocator
+function will return one page at a time. This means that the allocator
+function has the ability to overwrite the kernel's stack if it is called
+enough
+times.</p>
+
+<pre><code> x86_64_pagetable* allocator(void) { 
+   static uintptr_t next_free_page; 
+   if (next_free_page == 0)  { 
+     next_free_page = ROUNDUP((uintptr_t)end, PAGESIZE);   // the 'end' variable marks the end of the kernel's code and data
+     x86_64_pagetable *pt = (x86_64_pagetabpe*)next_free_page;  
+      next_free_page += PAGESIZE; 
+      return pt; 
+   }
+ }
+</code></pre>
+
+<p>With these components in place, process isolation can successfully
+succeed. Going back to Alice and Eve, Eve will not longer be able to
+overwrite Alice's code segment because Alice's memory is no longer
+accessible to Eve. Eve will be killed for trying to access invalid
+memory.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+<li>- <a href="http://www.read.seas.harvard.edu/~kohler/class/aosref/ritchie84evolution.pdf">The Evolution of the UNIX time-sharing
+    system</a>
+    This is a lovely paper that explains some of the <em>how</em> and <em>why</em>
+    behind the way we interact with operating systems today.</li>
+</ul>
+
+    </div>
+</div>
+
+        <script src="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/jquery-3.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/popper.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/bootstrap.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="Kernel%204%20Page%20tables%20and%20process%20isolation%20(2017)%20%E2%80%93%20CS%2061%202018_files/katex.js" integrity="sha384-O4hpKqcplNCe+jLuBVEXC10Rn1QEqAmX98lKAIFBEDxZI0a+6Z2w2n8AEtQbR4CD" crossorigin="anonymous"></script>
+        <script>(function () {
+        $(".math").each(function () {
+            var t = this.innerText,
+                opt = {throwOnError: false, displayMode: t.substr(0, 2) === "\\["};
+            katex.render(t.replace(/(?:^\\\(|^\\\[|\\\)$|\\\]$)/g, ""), this, opt);
+        });
+        function sol_toggle(sol, hide, storage) {
+            sol.childNodes[0].classList.toggle("hidden", !hide);
+            sol.childNodes[0].classList.toggle("shown", hide);
+            sol.childNodes[1].classList.toggle("hidden", hide);
+            sol.childNodes[1].classList.toggle("shown", !hide);
+            if (storage) {
+                var key = location.href + " " + $(".has-solution").index(sol);
+                if (hide)
+                    sessionStorage.removeItem(key);
+                else
+                    sessionStorage.setItem(key, true);
+            }
+        }
+        $(".solution").each(function () {
+            $(this).wrap('<div class="has-solution"></div>');
+            var sol = this.parentElement;
+            $(sol).prepend('<blockquote class="solution-collapsed js-solution show"><a href="" class="js-solution show"></a></blockquote>');
+            $(this).append('<p><a href="" class="js-solution hide"></a></p>');
+            $(sol).find("a.js-solution.show").text(this.getAttribute("data-show-text") || "Show solution");
+            $(sol).find("a.js-solution.hide").text(this.getAttribute("data-hide-text") || "Hide solution");
+            var key = location.href + " " + $(".has-solution").index(sol);
+            if (sessionStorage.getItem(key))
+                sol_toggle(sol, false, false);
+        });
+        $(document).on("click", ".js-solution", function (event) {
+            if (this.classList.contains("all")) {
+                var hide = this.classList.contains("hide");
+                $(".has-solution").each(function () {
+                    sol_toggle(this, hide, false);
+                });
+                var bq = this.tagName === "BLOCKQUOTE" ? this : this.parentElement;
+                $(bq).find(".show").toggleClass("hidden", !hide);
+                $(bq).find(".hide").toggleClass("hidden", hide);
+            } else {
+                var sol = $(this).closest(".has-solution")[0];
+                sol_toggle(sol, this.classList.contains("hide"), true);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        })()</script>
+    
+
+
+</body></html>
