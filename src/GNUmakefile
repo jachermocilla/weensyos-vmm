@@ -66,13 +66,13 @@ $(OBJDIR)/p-allocator%.full: $(ALLOCATOR_OBJS) link/p-allocator%.ld link/shared.
 	$(call link,-T link/p-allocator$*.ld link/shared.ld -o $@ $(ALLOCATOR_OBJS),LINK)
 
 $(OBJDIR)/%: $(OBJDIR)/%.full
-	$(call run,$(OBJDUMP) -S $< >$@.asm)
+	$(call run,$(OBJDUMP) -M intel -S $< >$@.asm)
 	$(call run,$(NM) -n $< >$@.sym)
 	$(call run,$(OBJCOPY) -j .text -j .rodata -j .data -j .bss $<,STRIP,$@)
 
 $(OBJDIR)/bootsector: $(BOOT_OBJS) link/boot.ld link/shared.ld
 	$(call link,-T link/boot.ld link/shared.ld -o $@.full $(BOOT_OBJS),LINK)
-	$(call run,$(OBJDUMP) -S $@.full >$@.asm)
+	$(call run,$(OBJDUMP) -M intel -S $@.full >$@.asm)
 	$(call run,$(NM) -n $@.full >$@.sym)
 	$(call run,$(OBJCOPY) -S -O binary -j .text $@.full $@)
 
