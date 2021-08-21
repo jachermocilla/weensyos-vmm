@@ -1,1 +1,2 @@
+*This is for the newer, C++, version of this lab*
 https://blog.tst.sh/building-a-kernel/
