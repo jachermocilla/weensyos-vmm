@@ -1,0 +1,22 @@
+body{font-family:helvetica,sans-serif,serif}h1,h2,h3{font-family:"chaparral-pro-caption",serif}h1.firstHeading{display:none}.hidden{display:none}table.simple > tbody > tr{vertical-align:baseline}table.simple > thead > tr{vertical-align:baseline}table.simple{border-spacing:0;border-collapse:collapse;empty-cells:show}table.simple.bordered{border-spacing:1px;border:1px solid black}table.simple.bordered > tbody > tr > th{border-spacing:1px;border:1px solid black}table.simple.bordered > tbody > tr > td{border-spacing:1px;border:1px solid black}table.simple > tbody > tr.k1 > td{background:#f1f8fc}table.simple > tbody > tr.k2 > td{background:#fcf1fb}table.colpad > tbody > tr > td:nth-child(n+2){padding-left:0.8em}table.colpad > tbody > tr > th:nth-child(n+2){padding-left:0.8em}table.col1rpad > tbody > tr > td:nth-child(1){padding-right:0.8em}table.col2rpad > tbody > tr > td:nth-child(2){padding-right:0.8em}td.sn{padding:3px 5px;text-align:right}table.spacey > tbody > tr > td{padding:1em 2em}table.mspacey > tbody > tr > td{padding:0.25em 0.5em}table.spacey-indexed > tbody > tr > td{padding:1em 2em}table.spacey-indexed > tbody > tr > td:first-child{padding:5px 5px;text-align:right}table.col2code > tbody > tr > td:nth-child(2){font-family:"source-code-pro",monospace}table.col1nowrap > tbody > tr > td:first-child{white-space:nowrap}table.col1right > tbody > tr > td:nth-child(1){text-align:right}table.col2right > tbody > tr > td:nth-child(2){text-align:right}table.col3right > tbody > tr > td:nth-child(3){text-align:right}table.col4right > tbody > tr > td:nth-child(4){text-align:right}table.col5right > tbody > tr > td:nth-child(5){text-align:right}table.col1center > tbody > tr > td:nth-child(1){text-align:center}table.col2center > tbody > tr > td:nth-child(2){text-align:center}table.col3center > tbody > tr > td:nth-child(3){text-align:center}table.col4center > tbody > tr > td:nth-child(4){text-align:center}table.col5center > tbody > tr > td:nth-child(5){text-align:center}table.colright > tbody > tr > td{text-align:right}table.col1left > tbody > tr > td:nth-child(1){text-align:left}table.col1center > tbody > tr > td:nth-child(1){text-align:center}table.col2left > tbody > tr > td:nth-child(2),table.col2left > tbody > tr > th:nth-child(2){text-align:left}td.hpink,tr.hpink{background:#ff80bb}td.hgreen,tr.hgreen{background:#aff0d6}td.hgray,tr.hgray{background:#888888}tr.hlgray{background:#cccccc}tr.hlyellow{background:#fcffd0}div.solution,div.sol{background:#eef8ff;padding:2px 5px;border:1px solid #6666AA;margin-left:2em}td > div.solution,td > div.sol,th > div.solution,th > div.sol{margin-left:0}pre > span.sol{background:#eef8ff;padding:3px 3px;border:1px solid #6666AA;margin:2px -4px;display:block}div.nosolution div.solution,div.nosolution div.sol{display:none}div.solution table,div.sol table{background:inherit}div.highlight{background:#f8f8f8;padding:2px 5px;border:1px solid #666666;margin-left:2em}div.hnote{background:#fffff0;padding:2px 5px;border:1px solid #dddd66;margin-left:2em}div#bodyContent{font-size:12pt}pre,code{font-size:10.75pt;font-family:"source-code-pro",monospace}div.prelike{padding:0 1em;border:1px dashed #2f6fab;background-color:#f9f9f9}div.prelike > pre{padding:0;border:0 none}div.sol > pre,div.sol code{background:#f0f4fa}code.greysmallpad{display:inline-block;margin-left:1.5em;font-size:smaller;color:#555555}span.nb{display:inline-block;white-space:nowrap;text-indent:0}div.alphaol > ol,td.alphaol > ol{list-style-type:lower-alpha}div.Alphaol > ol,td.Alphaol > ol{list-style-type:upper-alpha}div.romanol > ol,td.romanol > ol{list-style-type:lower-roman}div.Romanol > ol,td.Romanol > ol{list-style-type:upper-roman}
+/*
+     FILE ARCHIVED ON 20:51:01 Mar 04, 2020 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 09:42:40 Aug 08, 2021.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  CDXLines.iter: 22.315 (3)
+  exclusion.robots.policy: 0.202
+  captures_list: 102.879
+  RedisCDXSource: 0.713
+  LoadShardBlock: 74.836 (3)
+  PetaboxLoader3.datanode: 85.904 (4)
+  esindex: 0.014
+  PetaboxLoader3.resolve: 160.655
+  load_resource: 176.573
+  exclusion.robots: 0.216
+*/
