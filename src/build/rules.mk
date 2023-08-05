@@ -26,13 +26,13 @@ CFLAGS := $(CFLAGS) \
 	-std=gnu11 -m64 \
 	-mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow \
 	-ffreestanding -fno-omit-frame-pointer \
-	-Wall -W -Wshadow -Wno-format -Wno-unused -Werror -gdwarf-2
+	-Wall -W -Wshadow -Wno-format -Wno-unused -Werror -gdwarf-2 -nostartfiles
 # Include -fno-stack-protector if the option exists.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
 # Linker flags
-LDFLAGS := $(LDFLAGS) -Os --gc-sections -z max-page-size=0x1000 -static -nostdlib -nostartfiles
+LDFLAGS := $(LDFLAGS) -Os --gc-sections -z max-page-size=0x1000 -static -nostdlib 
 LDFLAGS	+= $(shell $(LD) -m elf_x86_64 --help >/dev/null 2>&1 && echo -m elf_x86_64)
 
 
